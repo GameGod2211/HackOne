@@ -42,8 +42,9 @@ I've built an all-in-one ethical hacking toolkit that brings together the most p
 ## 🚀 How to Use
 
 1. **Install Git**  
-   ```
-   pkg install git
+ ```
+pkg install git
+ ```
 2.**Clone This Respository**
   ```
   git clone https://github.com/GameGod2211/HackOne.git
