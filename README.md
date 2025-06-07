@@ -38,3 +38,25 @@ I've built an all-in-one ethical hacking toolkit that brings together the most p
 - ♻️ Auto IP Changer
 
 > ⚠️ For educational and ethical testing purposes only.
+
+## 🚀 How to Use
+
+1. **Install Git**  
+   ```
+   pkg install git
+2.**Clone This Respository**
+  ```
+  git clone https://github.com/GameGod2211/HackOne.git
+```
+3.**Navigate To Respository**
+```
+cd HackOne
+```
+4.**Premission**
+```
+sed -i 's/\r$//' HackerOne.sh
+```
+6.**Run**
+```
+bash HackerOne.sh
+```
