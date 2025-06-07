@@ -57,7 +57,7 @@ cd HackOne
 ```
 sed -i 's/\r$//' HackerOne.sh
 ```
-6.**Run**
+5.**Run**
 ```
 bash HackerOne.sh
 ```
