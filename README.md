@@ -61,3 +61,8 @@ sed -i 's/\r$//' HackerOne.sh
 ```
 bash HackerOne.sh
 ```
+## ⚠️ Warning
+
+1.Some tools need rooting to use pls root your system for those tools.
+
+2.I am not responsiable but any misuse of the toolkit it for educational porpuse only
