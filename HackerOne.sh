@@ -84,8 +84,8 @@ cd fast-mail-bomber/
 mv config.example.php config.php
 php index.php update-providers
 rm -rf data/nodes.json data/dead_providers.json
-echo -e "\033[47;3;35m Ky instalim do tju marre shum kohe\033[0m"
-echo -e "\033[47;3;35m Per te ndaluar shtypni Ctrl+C\033[0m"
+echo -e "\033[47;3;35m This installation will take a long time.\033[0m"
+echo -e "\033[47;3;35m To stop press Ctrl+C\033[0m"
 sleep 4
 php index.php update-nodes
 php index.php refine-nodes
