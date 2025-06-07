@@ -1,7 +1,7 @@
 # HackOne
-## 👨‍💻 Meet Arora
+## 👨‍💻 Hacker Devil
 
-Hi, I'm Meet Arora — a self-taught hacker and tech enthusiast.  
+Hi, I'm Hacker Devil — a self-taught hacker and tech enthusiast.  
 I love building tools, breaking things (ethically), and learning by doing.
 
 ## 🔧 Skills
