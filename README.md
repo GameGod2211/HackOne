@@ -65,4 +65,10 @@ bash HackerOne.sh
 
 1.Some tools need rooting to use pls root your system for those tools.
 
-2.I am not responsiable but any misuse of the toolkit it for educational porpuse only
+2.I am not responsiable for any misuse of the toolkit it for educational porpuse only
+
+3.This tool will only work on kali linux 
+
+## Improvement 
+
+1. Some updates for underway I will work on it to make it more efficient 
