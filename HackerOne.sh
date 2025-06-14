@@ -120,7 +120,7 @@ echo -e "\033[47;3;35m REMOVING DOWNLOADED PROGRAMS...\033[0m"
 sleep 3 
 rm -rf Tools
 
-bash alhack.sh
+bash HackerOne.sh
 
 elif [[ $islem == 9 || $islem == 09 ]]; then
 clear
@@ -247,5 +247,5 @@ else
         echo -e '\033[36;40;1m You entered the wrong code.'	
 	sleep 1
 	clear 
-	bash alhack.sh
+	bash HackerOne.sh
 fi
