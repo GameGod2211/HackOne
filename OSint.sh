@@ -1,109 +1,99 @@
 #!/bin/bash
+# HawkScan Lite with Dashboard UI
+# Hack - One | Coded by: Hacker Devil
 
-echo "
-    ___     _                     _____ _____  
-   / _ \ __| | ___ _ __ ___  ___ | ____|_   _| 
-  | | | / _\` |/ _ \ '__/ _ \/ _ \|  _|   | |   
-  | |_| | (_| |  __/ | |  __/  __/| |___  | |   
-   \___/ \__,_|\___|_|  \___|\___||_____| |_|   
+# Check dependencies
+for cmd in curl jq dialog xargs; do
+  if ! command -v $cmd &>/dev/null; then
+    echo "⚠️ Please install '$cmd' to run this tool."
+    exit 1
+  fi
+done
 
-       ░█▀█░█░█░█░█░█▀█░█▀█░█▀▀
-       ░█▀▄░█░█░█░█░█░█░█░█░█░█
-       ░▀░▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░▀▀▀
-     OSINT Intelligence Toolkit
+# -- Banner --
+cat <<'BANNER'
+ _    _            _        ____   ____   _   _ ______ 
+| |  | |          | |      |  _ \ / __ \ | \ | |  ____|
+| |__| | __ _  ___| | __   | |_) | |  | ||  \| | |__   
+|  __  |/ _` |/ __| |/ /   |  _ <| |  | || . ` |  __|  
+| |  | | (_| | (__|   <    | |_) | |__| || |\  | |____ 
+|_|  |_|\__,_|\___|_|\_\   |____/ \____/ |_| \_|______|
 
-        👨‍💻 Coded by: Hacker Devil
-"
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          HAWKSCAN LITE - OSINT TOOL
+         Hack - One  |  Hacker Devil
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BANNER
 
-# === Configuration ===
-ABUSE_API_KEY="51ce390c1e5c5f1041c57ca31151b44a33bfdcee42ee957f59ef0ce7ea14bc3445986158111fb325"
-IPINFO_API_KEY="a0ab2971-3381-41fe-bc90-d46db2d77bf6"
-
-read -p "Enter an IP address or username: " TARGET
+# -- Setup --
+read -p "🔍 Enter username to scan: " USERNAME
 TS=$(date +"%Y%m%d_%H%M%S")
-OUT_DIR="osint_scan_${TARGET}_$TS"
+OUT_DIR="hawkscan_${USERNAME}_$TS"
+FOUND="$OUT_DIR/found.txt"
+JSON="$OUT_DIR/results.json"
 mkdir -p "$OUT_DIR"
 
-# === IP Pattern Check ===
-if [[ "$TARGET" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    echo "📡 Scanning IP: $TARGET"
+SITES=(
+  "https://github.com/$USERNAME"
+  "https://twitter.com/$USERNAME"
+  "https://instagram.com/$USERNAME"
+  "https://reddit.com/user/$USERNAME"
+  "https://www.tiktok.com/@$USERNAME"
+  "https://www.pinterest.com/$USERNAME"
+  "https://www.deviantart.com/$USERNAME"
+  "https://www.producthunt.com/@$USERNAME"
+  "https://www.quora.com/profile/$USERNAME"
+  "https://www.behance.net/$USERNAME"
+  "https://www.kaggle.com/$USERNAME"
+  "https://soundcloud.com/$USERNAME"
+  "https://www.twitch.tv/$USERNAME"
+  "https://steamcommunity.com/id/$USERNAME"
+  "https://medium.com/@$USERNAME"
+  "https://keybase.io/$USERNAME"
+  "https://stackoverflow.com/users/$USERNAME"
+)
 
-    # === AbuseIPDB Query ===
-    echo "🔗 Querying AbuseIPDB..."
-    ABUSE_RESPONSE=$(curl -sG "https://api.abuseipdb.com/api/v2/check" \
-      --data-urlencode "ipAddress=$TARGET" \
-      --data-urlencode "maxAgeInDays=90" \
-      -H "Key: $ABUSE_API_KEY" \
-      -H "Accept: application/json")
+check_site() {
+  local URL="$1"
+  STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+  if [[ "$STATUS" =~ ^(200|301|302)$ ]]; then
+    echo "✅ $URL" >> "$FOUND"
+    curl -s "$URL" > "$OUT_DIR/$(echo "$URL" | sed 's/[^A-Za-z0-9]/_/g').html"
+  fi
+}
 
-    echo "📊 AbuseIPDB Report:"
-    echo "$ABUSE_RESPONSE" | jq '.data | {
-        IP: .ipAddress,
-        AbuseScore: .abuseConfidenceScore,
-        Country: .countryCode,
-        UsageType: .usageType,
-        Domain: .domain,
-        ISP: .isp,
-        Hostnames: .hostnames,
-        IsVPN: .isVpn,
-        IsTorExitNode: .isTorExitNode,
-        IsPublicProxy: .isPublicProxy,
-        TotalReports: .totalReports,
-        LastReportedAt: .lastReportedAt
-    }'
-    echo "$ABUSE_RESPONSE" > "$OUT_DIR/${TARGET}_abuseipdb.json"
+# -- Run Scan --
+printf "%s\n" "${SITES[@]}" | xargs -n1 -P10 -I {} bash -c 'check_site "$@"' _ {}
 
-    # VPN / Proxy / Tor Flags
-    IS_VPN=$(echo "$ABUSE_RESPONSE" | jq -r '.data.isVpn')
-    IS_TOR=$(echo "$ABUSE_RESPONSE" | jq -r '.data.isTorExitNode')
-    IS_PROXY=$(echo "$ABUSE_RESPONSE" | jq -r '.data.isPublicProxy')
-
-    echo -e "\n🛡️  VPN / Proxy / Tor Detection:"
-    [ "$IS_VPN" == "true" ] && echo "🟠 VPN Detected"
-    [ "$IS_PROXY" == "true" ] && echo "🔵 Public Proxy Detected"
-    [ "$IS_TOR" == "true" ] && echo "🧅 Tor Exit Node Detected"
-    if [ "$IS_VPN" == "false" ] && [ "$IS_PROXY" == "false" ] && [ "$IS_TOR" == "false" ]; then
-        echo "✅ No VPN/Proxy/Tor detected"
-    fi
-
-    # === WHOIS ===
-    echo -e "\n🌐 WHOIS Lookup:"
-    WHOIS_OUTPUT=$(whois "$TARGET" | grep -Ei "OrgName|OrgId|Country|NetRange|CIDR|Name|address|descr")
-    echo "$WHOIS_OUTPUT" > "$OUT_DIR/${TARGET}_whois.txt"
-    echo "$WHOIS_OUTPUT"
-
-    # === IPInfo ===
-    echo -e "\n🌍 IPInfo Lookup:"
-    IPINFO_RESPONSE=$(curl -s "https://ipinfo.io/$TARGET?token=$IPINFO_API_KEY")
-    echo "$IPINFO_RESPONSE" | jq '{
-        IP: .ip,
-        City: .city,
-        Region: .region,
-        Country: .country,
-        Location: .loc,
-        Org: .org,
-        ASN: .asn,
-        Timezone: .timezone
-    }'
-    echo "$IPINFO_RESPONSE" > "$OUT_DIR/${TARGET}_ipinfo.json"
-
-    # Google Maps
-    GEOLOC=$(echo "$IPINFO_RESPONSE" | jq -r '.loc')
-    MAP_URL="https://www.google.com/maps?q=$GEOLOC"
-    echo "📍 View location: $MAP_URL"
-    if command -v xdg-open >/dev/null; then xdg-open "$MAP_URL"
-    elif command -v open >/dev/null; then open "$MAP_URL"; fi
-
+# -- Build JSON Summary --
+if [ -s "$FOUND" ]; then
+  jq -Rn --slurpfile urls "$FOUND" '{"username":"'"$USERNAME"'", "matches":$urls[0]}' > "$JSON"
 else
-    echo "🧑‍💻 Scanning Username: $TARGET"
-
-    if ! command -v maigret &>/dev/null; then
-        echo "❌ Maigret not installed. Run: pip install maigret"
-        exit 1
-    fi
-
-    maigret "$TARGET" --format json --output "$OUT_DIR/${TARGET}_maigret.json"
-    echo "✅ Maigret scan complete. Saved to $OUT_DIR/${TARGET}_maigret.json"
+  echo '{"username":"'"$USERNAME"'", "matches":[]}' > "$JSON"
 fi
 
-echo -e "\n📁 Scan completed. Results saved in: $OUT_DIR"
+# -- Dashboard Menu --
+while true; do
+  CMD=$(dialog --clear --backtitle "Hack - One" \
+    --title "HawkScan Lite Dashboard" \
+    --menu "Username: $USERNAME" 15 60 4 \
+    1 "Show Found URLs" \
+    2 "View HTML Files" \
+    3 "View JSON Report" \
+    4 "Exit" \
+    2>&1 >/dev/tty)
+
+  case $CMD in
+    1)
+      dialog --backtitle "Found Results" --title "Found URLs" --textbox "$FOUND" 20 60;;
+    2)
+      FILE=$(ls "$OUT_DIR"/*.html | dialog --backtitle "HTML Files" --title "Select HTML" --menu "Choose file to view:" 15 60 10 2>&1 >/dev/tty)
+      [ "$FILE" ] && dialog --backtitle "View HTML" --title "$FILE" --textbox "$FILE" 20 60;;
+    3)
+      dialog --backtitle "JSON Report" --title "Report Content" --textbox "$JSON" 20 60;;
+    4)
+      clear; echo "👋 Exiting HawkScan Lite."; exit 0;;
+    *)
+      ;;
+  esac
+done
